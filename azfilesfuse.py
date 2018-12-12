@@ -40,7 +40,7 @@ executor = concurrent.futures.ThreadPoolExecutor(multiprocessing.cpu_count())
 
 # This controls the minimum level that is logged.
 # Available levels are: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL.
-LOGGING_LEVEL=logging.INFO
+LOGGING_LEVEL=logging.DEBUG
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
@@ -69,6 +69,7 @@ class WriteInfo:
 
     def write(self):
         try:
+          logger.debug("WriteInfo write(self)")
             with self.files.file_cache[self.orig_path].append_write_lock:
                 self.processing = True
             with self.files.file_cache[self.orig_path].write_lock:
@@ -142,6 +143,7 @@ class AzureFiles(LoggingMixIn, Operations):
         self.dir_cache = {}
 
         self.file_cache = defaultdict(FileCache)
+        logger.info("Done (?) initializing AzureFiles Fuse Driver Implementation")
 
     def _get_separated_path(self, path):
         path = path.lstrip('/')
@@ -169,6 +171,7 @@ class AzureFiles(LoggingMixIn, Operations):
         '''
         path = path.lstrip('/')
         try:
+            logger.debug("AzureFiles create(self, path, mode) path: " + path + ", mode: " + mode)
             if not path:
                 raise FuseOSError(errno.EINVAL)
 
@@ -261,6 +264,7 @@ class AzureFiles(LoggingMixIn, Operations):
         '''
         path = path.lstrip('/')
         try:
+            logger.debug("AzureFiles mkdir(self, path, mode) path: " + path + ", mode: " + mode)
             self._files_service.create_directory(
                 self._azure_file_share_name, path, fail_on_exist=True)
             directory, filename = self._get_separated_path(path)
@@ -288,6 +292,7 @@ class AzureFiles(LoggingMixIn, Operations):
         '''
         self.flush(path)
         try:
+            logger.debug("AzureFiles read(self, path, size, offset, fh) path: " + path)
             dir_path, file_path = self._get_separated_path(path)
             try:
                 data_to_return = self._files_service.get_file_to_bytes(
@@ -331,6 +336,7 @@ class AzureFiles(LoggingMixIn, Operations):
         path = path.lstrip('/')
 
         try:
+            logger.debug("AzureFiles readdir(self, path, fh) path: " + path)
             directory_listing = self._get_cached_dir(path)
 
             readdir_return = ['.', '..']
@@ -347,6 +353,7 @@ class AzureFiles(LoggingMixIn, Operations):
         TODO: Currently this implementation does not support renaming directories. Support needed.
         """
         try:
+            logger.debug("AzureFiles rename(self, old, new) old: " + old + ", new: " + new)
             old_orig_path = old
             old_path = old.strip('/')
             new_path = new.strip('/')
@@ -428,7 +435,7 @@ class AzureFiles(LoggingMixIn, Operations):
         removes a directory at specified path
         '''
         try:
-
+            logger.debug("AzureFiles rmdir(self, path) path: " + path)
             path = path.strip('/')
             try:
                 self._files_service.delete_directory(self._azure_file_share_name, path)
@@ -463,6 +470,7 @@ class AzureFiles(LoggingMixIn, Operations):
         '''
         self.flush(path)
         try:
+            logger.debug("AzureFiles unlink(self, path) path: " + path)
             orig_path = path
             path = path.strip('/')
             directory, filename = self._get_separated_path(path)
@@ -489,6 +497,7 @@ class AzureFiles(LoggingMixIn, Operations):
         write
         '''
         try:
+            logger.debug("AzureFiles write(self, path, data, offset, fh) path: " + path)
             orig_path = path
             path = path.lstrip('/')
             directory, filename = self._get_separated_path(path)
