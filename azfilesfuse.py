@@ -69,7 +69,7 @@ class WriteInfo:
 
     def write(self):
         try:
-          logger.debug("WriteInfo write(self)")
+            logger.debug("WriteInfo write(self)")
             with self.files.file_cache[self.orig_path].append_write_lock:
                 self.processing = True
             with self.files.file_cache[self.orig_path].write_lock:
