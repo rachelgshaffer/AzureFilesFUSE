@@ -129,21 +129,16 @@ class AzureFiles(LoggingMixIn, Operations):
     '''
     def __init__(self, azure_storage_account_name, azure_file_share_name, sas_token):
         LoggingMixIn.log.addHandler(console_handler)
-
         logger.info("Initializing AzureFiles Fuse Driver Implementation:%s %s", azure_storage_account_name, azure_file_share_name)
         self._azure_storage_account_name = azure_storage_account_name
         self._azure_file_share_name = azure_file_share_name
         self._sas_token = sas_token.lstrip("?")
-        self._files_service = file.FileService(self._azure_storage_account_name, sas_token=self._sas_token, request_session=Session())
-        
+        self._files_service = file.FileService(self._azure_storage_account_name, sas_token=self._sas_token, request_session=Session())        
         self._prior_write_failure = False
-
         self.writes = deque()
-
         self.dir_cache = {}
-
         self.file_cache = defaultdict(FileCache)
-        logger.info("Done (?) initializing AzureFiles Fuse Driver Implementation")
+        logger.info("Finished initializing AzureFiles Fuse Driver")
 
     def _get_separated_path(self, path):
         path = path.lstrip('/')
@@ -313,16 +308,19 @@ class AzureFiles(LoggingMixIn, Operations):
             raise e
 
     def _get_cached_dir(self, path, force = True):
+        logging.debug(str(self.dir_cache) + " - " + str(path) + " - " + str(force))
         cached = self.dir_cache.get(path)
         if (cached is None or cached[1] + 5 < time()) and force:
-            directory_listing = { item.name:item for item in
-                                  self._files_service.list_directories_and_files(self._azure_file_share_name, path)
-            }
+            res = self._files_service.list_directories_and_files(self._azure_file_share_name, path)
+            directory_listing = { item.name:item for item in res}
             self.dir_cache[path] = directory_listing, time()
+            logging.debug("Returning directory_listing: " + str(res))
             return directory_listing
         if cached is None:
+            logging.debug("This shouldn't happen")
             return None
         else:
+            logging.debug("Returning cached result " + str(cached[0]))
             return cached[0]
 
     def _clear_dir_cache(self, path, reason):
