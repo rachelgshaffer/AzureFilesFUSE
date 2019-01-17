@@ -52,9 +52,9 @@ with mock.patch.object(ctypes.util, 'find_library', side_effect=find_library_moc
 
 
 class Test_azfilesfuse(unittest.TestCase):
-    STORAGE_ACCOUNT_NAME='crwilcoxmsftplayground'
-    STORAGE_ACCOUNT_SHARE='fusetests'
-    STORAGE_ACCOUNT_SAS_TOKEN=None
+    STORAGE_ACCOUNT_NAME='fusetests'
+    STORAGE_ACCOUNT_SHARE='fusetests2'
+    STORAGE_ACCOUNT_SAS_TOKEN='?sv=2018-03-28&ss=f&srt=sco&sp=rwdlc&se=2030-01-12T07:39:58Z&st=2019-01-11T23:39:58Z&spr=https&sig=jmTKwV9gRJyxfNbj%2Fc%2Ftpg%2F7EU3ggGfcB3pnfS%2BxfDc%3D'
 
     def setUp(self):
         # TODO: Verify Settings provided
